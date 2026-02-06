@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-TW" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=auto">
+  <title>抽卡系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    }
+    
+    @keyframes cardReveal {
+      0% { 
+        transform: rotateY(180deg) scale(0.3);
+        opacity: 0;
+      }
+      50% {
+        transform: rotateY(90deg) scale(1.1);
+        opacity: 0.5;
+      }
+      100% { 
+        transform: rotateY(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4); }
+    }
+    
+    @keyframes shuffleCards {
+      0% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-30px) rotate(-5deg); }
+      50% { transform: translateX(30px) rotate(5deg); }
+      75% { transform: translateX(-15px) rotate(-3deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    
+    .card-reveal {
+      animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    .card-glow {
+      animation: glow 2s ease-in-out infinite;
+    }
+    
+    .shuffle-animation {
+      animation: shuffleCards 0.6s ease-in-out;
+    }
+    
+    .sparkle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      animation: sparkle 1.5s ease-in-out infinite;
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .card-stack {
+      perspective: 1000px;
+    }
+    
+    .drawn-card {
+      transition: all 0.3s ease;
+    }
+    
+    .drawn-card:hover {
+      transform: scale(1.05) translateY(-5px);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto">
+  <div id="app-container" class="min-h-full w-full relative overflow-hidden"><!-- 背景裝飾 -->
+   <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 left-10 w-32 h-32 bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute bottom-20 right-10 w-40 h-40 bg-purple-500 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/4 w-24 h-24 bg-pink-400 rounded-full opacity-10 blur-2xl"></div>
+   </div>
+   <div class="relative z-10 flex flex-col items-center justify-start min-h-full py-8 px-4"><!-- 標題 -->
+    <h1 id="main-title" class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-2 text-center drop-shadow-lg">✨ 神秘抽卡 ✨</h1>
+    <p class="text-gray-300 mb-6 text-center">每張卡牌機率相同，試試你的運氣！</p><!-- 抽卡區域 -->
+    <div class="flex flex-col items-center gap-6 w-full max-w-md"><!-- 卡牌堆 -->
+     <div id="card-stack" class="card-stack relative w-48 h-72 cursor-pointer float-animation">
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-800 rounded-2xl shadow-2xl border-4 border-yellow-400 flex items-center justify-center transform rotate-2 translate-x-2 translate-y-2 opacity-60">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-800 rounded-2xl shadow-2xl border-4 border-yellow-400 flex items-center justify-center transform -rotate-2 -translate-x-1 translate-y-1 opacity-80">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-2xl shadow-2xl border-4 border-yellow-400 flex items-center justify-center">
+       <div class="text-center">
+        <div class="text-6xl mb-2">
+         🎴
+        </div>
+        <p class="text-white font-bold text-lg">點擊抽卡</p>
+        <p id="card-count" class="text-yellow-300 text-sm mt-1">共 0 張卡牌</p>
+       </div>
+      </div>
+     </div><!-- 抽卡按鈕 --> <button id="draw-button" class="relative group px-10 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full font-bold text-xl text-white shadow-lg transform transition-all duration-300 hover:scale-110 hover:shadow-2xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"> <span class="relative z-10">🎲 抽一張！</span>
+      <div class="absolute inset-0 bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"></div></button>
+    </div><!-- 抽到的卡片展示區 -->
+    <div id="result-area" class="mt-8 flex flex-col items-center hidden">
+     <h2 class="text-2xl font-bold text-yellow-400 mb-4">🎉 恭喜獲得！</h2>
+     <div id="drawn-card" class="relative"><!-- 光芒效果 -->
+      <div class="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 rounded-3xl opacity-30 blur-xl"></div>
+      <div class="sparkle" style="top: -10px; left: 20%; animation-delay: 0s;">
+       ✨
+      </div>
+      <div class="sparkle" style="top: 30%; right: -10px; animation-delay: 0.5s;">
+       ⭐
+      </div>
+      <div class="sparkle" style="bottom: -10px; left: 40%; animation-delay: 1s;">
+       ✨
+      </div>
+      <div class="sparkle" style="top: 50%; left: -10px; animation-delay: 0.3s;">
+       ⭐
+      </div><img id="card-image" class="relative w-56 h-80 object-cover rounded-xl shadow-2xl card-glow drawn-card" src="" alt="抽到的卡牌" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.alt='卡牌載入失敗';">
+     </div>
+     <p id="card-name" class="mt-4 text-xl font-bold text-white"></p>
+    </div><!-- 抽卡記錄 -->
+    <div id="history-section" class="mt-10 w-full max-w-2xl hidden">
+     <h3 class="text-xl font-bold text-yellow-400 mb-4 text-center">📜 抽卡記錄</h3>
+     <div id="history-container" class="flex flex-wrap justify-center gap-3 p-4 bg-black bg-opacity-30 rounded-2xl backdrop-blur-sm">
+     </div>
+     <p id="history-count" class="text-center text-gray-400 mt-3 text-sm"></p>
+    </div><!-- 無卡牌提示 -->
+    <div id="no-cards-message" class="mt-8 text-center hidden">
+     <div class="text-6xl mb-4">
+      📭
+     </div>
+     <p class="text-gray-300 text-lg">尚未載入卡牌圖片</p>
+     <p class="text-gray-400 text-sm mt-2">請在編輯器中添加卡牌圖片</p>
+    </div>
+   </div>
+  </div>
+  <script>
+    // 卡牌數據 - 這裡放置所有卡牌圖片URL
+    const cardPool = [
+      { id: 1, name: "卡牌 #1", image: "https://scontent.ftpe8-1.fna.fbcdn.net/v/t39.30808-6/626603866_884958064292112_6628058839038325437_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=127cfc&_nc_ohc=VjDVSGJ_u4MQ7kNvwG3QFja&_nc_oc=AdnZQnXOL8Eczp4ibw5OTD5eG9fl71mZ362mUft1vWPQHCrMHGxoXv9GRyi3FTWuVONAtYHmoXE2Zi_VTXcyklQR&_nc_zt=23&_nc_ht=scontent.ftpe8-1.fna&_nc_gid=1uL7h57deobkV4e7mvMNGw&oh=00_Afv3RmzV6I7a8X583dK0hhGdrs6BjHLCoobrr8ochKNtEQ&oe=698AA0A6" },
+      { id: 2, name: "卡牌 #2", image: "https://scontent.ftpe8-1.fna.fbcdn.net/v/t39.30808-6/626794990_884958057625446_4959918686958060504_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=SR3JB0UD80gQ7kNvwGeTU_R&_nc_oc=Adku3WHGcxGVKI5-ceU8AOJUDoAJs0XzYkxXmXXi2JVQjCGTNkAjQH81Z5eoAdGLDRG9myGKQW3YKI-Qid2mlo30&_nc_zt=23&_nc_ht=scontent.ftpe8-1.fna&_nc_gid=sCHsLaApO0y0ZRwuynZ9eg&oh=00_AfubQ2ol3khXaASFC4HQxqfAbJR30Ze4Su8OrlmXmBvIuA&oe=698AA42A" },
+      { id: 3, name: "卡牌 #3", image: "https://scontent.ftpe8-4.fna.fbcdn.net/v/t39.30808-6/627042683_884958054292113_9163345867106511516_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=-52M1dO89l0Q7kNvwHb7ZFY&_nc_oc=AdmTDeOz1vglA8adNqyZXRXtcyUcxe3Nosvs5IrE02ygQsYO7TEa_0CXYo1DnG5UH0glm8CFzSF9Sd9h2X-RKJfE&_nc_zt=23&_nc_ht=scontent.ftpe8-4.fna&_nc_gid=DEUQUPiKp8LfKenZcUEdnw&oh=00_AftW81Zmkz2_zhkfDL2kKdZS7LXtqzafuHzozo0__d1nRw&oe=698A9C72" },
+      { id: 4, name: "卡牌 #4", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/626756255_884958124292106_615145778039159321_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=G5PhV7txo6sQ7kNvwFixUSp&_nc_oc=AdlLdSR75FdvlvW28TnxcwjHyY_wOs3PFW7T9xPHRCBvYW0t4he5WZxYxqQ6giHfVFIOY-HY8uIAnZ27wcX5PWc6&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=6ewBapGZwOi6o2VSrPCPkg&oh=00_AfsY5hRty2pZ1iYvbQqqPeie7FD1o0Dd5stDGI8dK5ysIA&oe=698AB6C4" },
+      { id: 5, name: "卡牌 #5", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/626747055_884958144292104_1041338412689329160_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=5DJk2DRN48IQ7kNvwFFz5WM&_nc_oc=AdlEzqZjSwxSw6m0DVfp6CqKsJK2nUI-ETiykxi-US8wcw1lX8eqM0YzhhJEo-BFIEJNB4AoXr8P5enOQ66j13f7&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=0thc6hdBJFuIC7p27No_2w&oh=00_Afv9h4C5eLf12p74IiOcWg6DmcQQ5831fzenP6fAMR5O6A&oe=698AC6E7" },
+      { id: 6, name: "卡牌 #6", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/626527837_884958150958770_6167634085700134849_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=Q2Ovs1-PnoYQ7kNvwFc-fIr&_nc_oc=Adno_pUryhy9F3Oqp6d2cnhyICLpbOHDKSjCSgtrvTP7ttjyBDM6KxG0_Hf2vaWSVARR-1qtyyCY1OVATUAg0kfO&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=z82IkJjRJDAWp5RaRLSBCA&oh=00_AftwXwFX6IRmWZjuHMRXGflgDBAeEcFHZ6armk02SfLc0Q&oe=698A957A" },
+      { id: 7, name: "卡牌 #7", image: "https://scontent.ftpe8-2.fna.fbcdn.net/v/t39.30808-6/626312222_884958230958762_1257594513723222116_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=yZKYdltSH1QQ7kNvwHGJXkq&_nc_oc=AdkBUegFll2pbVF3f4YXOPEjzw7GgjPF5URhGMeGFbTYlX0Jp-Uta9W2Ym5uesMNVg0reaA53JQPNdeM97CKZlQm&_nc_zt=23&_nc_ht=scontent.ftpe8-2.fna&_nc_gid=ltxLWukt-8oGgF63IAomUQ&oh=00_Afsw0mkrc7mPkRLZTbAOm3Iv_4zGWaaSepLBdaBlDl6jRg&oe=698AC7C5" },
+      { id: 8, name: "卡牌 #8", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/627208063_884958257625426_7014566943562269715_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=pjbqEp0NGvcQ7kNvwHt-pB-&_nc_oc=AdndHlx_U1yIcOCHuKFme5Vt4BOEH_VUJ3XexWvGu7kVzFLpkCr7NvT1r7EbYe_LPyVgnMed8FJduXPBk002qbZ7&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=eYJ7UPIafsDLuoOCfRLBZg&oh=00_AfvwbA9KsBm77zwdafWbbDaWpoi-9e616c34pJ30mTikEA&oe=698AAF57" }
+    ];
+    
+    let drawHistory = [];
+    let isDrawing = false;
+    
+    const defaultConfig = {
+      title_text: "✨ 神秘抽卡 ✨",
+      draw_button_text: "🎲 抽一張！",
+      background_color: "#0f0f23",
+      accent_color: "#fbbf24",
+      card_back_color: "#6366f1",
+      text_color: "#ffffff",
+      font_family: "Noto Sans TC"
+    };
+    
+    // 等比例隨機抽卡
+    function drawCard() {
+      if (cardPool.length === 0) return null;
+      const randomIndex = Math.floor(Math.random() * cardPool.length);
+      return cardPool[randomIndex];
+    }
+    
+    // 執行抽卡動畫和邏輯
+    function performDraw() {
+      if (isDrawing || cardPool.length === 0) return;
+      
+      isDrawing = true;
+      const drawButton = document.getElementById('draw-button');
+      const cardStack = document.getElementById('card-stack');
+      const resultArea = document.getElementById('result-area');
+      const cardImage = document.getElementById('card-image');
+      const cardName = document.getElementById('card-name');
+      
+      drawButton.disabled = true;
+      
+      // 洗牌動畫
+      cardStack.classList.add('shuffle-animation');
+      
+      setTimeout(() => {
+        cardStack.classList.remove('shuffle-animation');
+        
+        // 抽卡
+        const drawnCard = drawCard();
+        if (drawnCard) {
+          // 記錄歷史
+          drawHistory.push(drawnCard);
+          updateHistory();
+          
+          // 顯示結果
+          cardImage.src = drawnCard.image;
+          cardImage.alt = drawnCard.name;
+          cardName.textContent = drawnCard.name;
+          
+          resultArea.classList.remove('hidden');
+          cardImage.classList.remove('card-reveal');
+          void cardImage.offsetWidth; // 觸發重繪
+          cardImage.classList.add('card-reveal');
+        }
+        
+        drawButton.disabled = false;
+        isDrawing = false;
+      }, 600);
+    }
+    
+    // 更新抽卡記錄
+    function updateHistory() {
+      const historySection = document.getElementById('history-section');
+      const historyContainer = document.getElementById('history-container');
+      const historyCount = document.getElementById('history-count');
+      
+      if (drawHistory.length > 0) {
+        historySection.classList.remove('hidden');
+        
+        // 只顯示最近的記錄
+        const recentHistory = drawHistory.slice(-20);
+        historyContainer.innerHTML = recentHistory.map((card, index) => `
+          <div class="relative group">
+            <img src="${card.image}" alt="${card.name}" 
+                 class="w-16 h-24 object-cover rounded-lg shadow-md transition-transform duration-200 group-hover:scale-110 group-hover:z-10"
+                 style="animation-delay: ${index * 0.05}s"
+                 loading="lazy"
+                 onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.alt='載入失敗';">
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all duration-200 flex items-center justify-center">
+              <span class="text-white text-xs opacity-0 group-hover:opacity-100 text-center px-1">${card.name}</span>
+            </div>
+          </div>
+        `).join('');
+        
+        historyCount.textContent = `已抽 ${drawHistory.length} 次`;
+      }
+    }
+    
+    // 檢查卡池狀態
+    function checkCardPool() {
+      const noCardsMessage = document.getElementById('no-cards-message');
+      const cardStack = document.getElementById('card-stack');
+      const drawButton = document.getElementById('draw-button');
+      const cardCount = document.getElementById('card-count');
+      
+      if (cardPool.length === 0) {
+        noCardsMessage.classList.remove('hidden');
+        cardStack.classList.add('hidden');
+        drawButton.disabled = true;
+      } else {
+        noCardsMessage.classList.add('hidden');
+        cardStack.classList.remove('hidden');
+        drawButton.disabled = false;
+        cardCount.textContent = `共 ${cardPool.length} 張卡牌`;
+      }
+    }
+    
+    // 配置變更處理
+    async function onConfigChange(config) {
+      const title = document.getElementById('main-title');
+      const drawButton = document.getElementById('draw-button');
+      const appContainer = document.getElementById('app-container');
+      
+      // 更新標題
+      title.textContent = config.title_text || defaultConfig.title_text;
+      
+      // 更新   鈕文字
+      drawButton.querySelector('span').textContent = config.draw_button_text || defaultConfig.draw_button_text;
+      
+      // 更新背景顏色
+      const bgColor = config.background_color || defaultConfig.background_color;
+      appContainer.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -20)} 100%)`;
+      
+      // 更新強調色
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      title.style.background = `linear-gradient(to right, ${accentColor}, ${adjustColor(accentColor, 30)}, ${adjustColor(accentColor, -20)})`;
+      title.style.webkitBackgroundClip = 'text';
+      title.style.backgroundClip = 'text';
+      
+      // 更新字體
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${fontFamily}, 'Noto Sans TC', sans-serif`;
+    }
+    
+    // 顏色調整輔助函數
+    function adjustColor(hex, amount) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+      const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+      const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+      return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
+    }
+    
+    // 初始化
+    function init() {
+      // 綁定事件
+      document.getElementById('draw-button').addEventListener('click', performDraw);
+      document.getElementById('card-stack').addEventListener('click', performDraw);
+      
+      // 檢查卡池
+      checkCardPool();
+      
+      // 初始化 SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+              },
+              {
+                get: () => config.accent_color || defaultConfig.accent_color,
+                set: (value) => { config.accent_color = value; window.elementSdk.setConfig({ accent_color: value }); }
+              },
+              {
+                get: () => config.card_back_color || defaultConfig.card_back_color,
+                set: (value) => { config.card_back_color = value; window.elementSdk.setConfig({ card_back_color: value }); }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+            },
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["title_text", config.title_text || defaultConfig.title_text],
+            ["draw_button_text", config.draw_button_text || defaultConfig.draw_button_text]
+          ])
+        });
+      }
+      
+      // 應用初始配置
+      onConfigChange(defaultConfig);
+    }
+    
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c94601121e88412',t:'MTc3MDMxNTEzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=auto;a.width=auto;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

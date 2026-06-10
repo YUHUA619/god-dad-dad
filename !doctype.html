@@ -12,11 +12,8 @@
       box-sizing: border-box;
     }
  
-   {
-  background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/20b104e8-c67e-4a56-915c-0c53659aab6e.png?raw=true');
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
+.box {
+  background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/20b104e8-c67e-4a56-915c-0c53659aab6e.png?raw=true') !important;
 }
     
     * {
@@ -254,7 +251,7 @@
                  class="w-16 h-24 object-cover rounded-lg shadow-md transition-transform duration-200 group-hover:scale-110 group-hover:z-10"
                  style="animation-delay: ${index * 0.05}s"
                  loading="lazy"
-                 onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.alt='載入失敗';">
+                 onerror="console.error('Image failed to load:', this.src); this.style. background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/20b104e8-c67e-4a56-915c-0c53659aab6e.png?raw=true'); this.alt='載入失敗';">
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all duration-200 flex items-center justify-center">
               <span class="text-white text-xs opacity-0 group-hover:opacity-100 text-center px-1">${card.name}</span>
             </div>
@@ -296,9 +293,6 @@
       // 更新   鈕文字
       drawButton.querySelector('span').textContent = config.draw_button_text || defaultConfig.draw_button_text;
       
-      // 更新背景顏色
-      const bgColor = config.background_color || defaultConfig.background_color;
-      appContainer.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -20)} 100%)`;
       
       // 更新強調色
       const accentColor = config.accent_color || defaultConfig.accent_color;

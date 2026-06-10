@@ -157,14 +157,14 @@
   <script>
     // 卡牌數據 - 這裡放置所有卡牌圖片URL
     const cardPool = [
-      { id: 1, name: "卡牌 #1", image: "https://scontent.ftpe8-1.fna.fbcdn.net/v/t39.30808-6/626603866_884958064292112_6628058839038325437_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=127cfc&_nc_ohc=VjDVSGJ_u4MQ7kNvwG3QFja&_nc_oc=AdnZQnXOL8Eczp4ibw5OTD5eG9fl71mZ362mUft1vWPQHCrMHGxoXv9GRyi3FTWuVONAtYHmoXE2Zi_VTXcyklQR&_nc_zt=23&_nc_ht=scontent.ftpe8-1.fna&_nc_gid=1uL7h57deobkV4e7mvMNGw&oh=00_Afv3RmzV6I7a8X583dK0hhGdrs6BjHLCoobrr8ochKNtEQ&oe=698AA0A6" },
-      { id: 2, name: "卡牌 #2", image: "https://scontent.ftpe8-1.fna.fbcdn.net/v/t39.30808-6/626794990_884958057625446_4959918686958060504_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=SR3JB0UD80gQ7kNvwGeTU_R&_nc_oc=Adku3WHGcxGVKI5-ceU8AOJUDoAJs0XzYkxXmXXi2JVQjCGTNkAjQH81Z5eoAdGLDRG9myGKQW3YKI-Qid2mlo30&_nc_zt=23&_nc_ht=scontent.ftpe8-1.fna&_nc_gid=sCHsLaApO0y0ZRwuynZ9eg&oh=00_AfubQ2ol3khXaASFC4HQxqfAbJR30Ze4Su8OrlmXmBvIuA&oe=698AA42A" },
-      { id: 3, name: "卡牌 #3", image: "https://scontent.ftpe8-4.fna.fbcdn.net/v/t39.30808-6/627042683_884958054292113_9163345867106511516_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=-52M1dO89l0Q7kNvwHb7ZFY&_nc_oc=AdmTDeOz1vglA8adNqyZXRXtcyUcxe3Nosvs5IrE02ygQsYO7TEa_0CXYo1DnG5UH0glm8CFzSF9Sd9h2X-RKJfE&_nc_zt=23&_nc_ht=scontent.ftpe8-4.fna&_nc_gid=DEUQUPiKp8LfKenZcUEdnw&oh=00_AftW81Zmkz2_zhkfDL2kKdZS7LXtqzafuHzozo0__d1nRw&oe=698A9C72" },
-      { id: 4, name: "卡牌 #4", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/626756255_884958124292106_615145778039159321_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=G5PhV7txo6sQ7kNvwFixUSp&_nc_oc=AdlLdSR75FdvlvW28TnxcwjHyY_wOs3PFW7T9xPHRCBvYW0t4he5WZxYxqQ6giHfVFIOY-HY8uIAnZ27wcX5PWc6&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=6ewBapGZwOi6o2VSrPCPkg&oh=00_AfsY5hRty2pZ1iYvbQqqPeie7FD1o0Dd5stDGI8dK5ysIA&oe=698AB6C4" },
-      { id: 5, name: "卡牌 #5", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/626747055_884958144292104_1041338412689329160_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=5DJk2DRN48IQ7kNvwFFz5WM&_nc_oc=AdlEzqZjSwxSw6m0DVfp6CqKsJK2nUI-ETiykxi-US8wcw1lX8eqM0YzhhJEo-BFIEJNB4AoXr8P5enOQ66j13f7&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=0thc6hdBJFuIC7p27No_2w&oh=00_Afv9h4C5eLf12p74IiOcWg6DmcQQ5831fzenP6fAMR5O6A&oe=698AC6E7" },
-      { id: 6, name: "卡牌 #6", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/626527837_884958150958770_6167634085700134849_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=Q2Ovs1-PnoYQ7kNvwFc-fIr&_nc_oc=Adno_pUryhy9F3Oqp6d2cnhyICLpbOHDKSjCSgtrvTP7ttjyBDM6KxG0_Hf2vaWSVARR-1qtyyCY1OVATUAg0kfO&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=z82IkJjRJDAWp5RaRLSBCA&oh=00_AftwXwFX6IRmWZjuHMRXGflgDBAeEcFHZ6armk02SfLc0Q&oe=698A957A" },
-      { id: 7, name: "卡牌 #7", image: "https://scontent.ftpe8-2.fna.fbcdn.net/v/t39.30808-6/626312222_884958230958762_1257594513723222116_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=yZKYdltSH1QQ7kNvwHGJXkq&_nc_oc=AdkBUegFll2pbVF3f4YXOPEjzw7GgjPF5URhGMeGFbTYlX0Jp-Uta9W2Ym5uesMNVg0reaA53JQPNdeM97CKZlQm&_nc_zt=23&_nc_ht=scontent.ftpe8-2.fna&_nc_gid=ltxLWukt-8oGgF63IAomUQ&oh=00_Afsw0mkrc7mPkRLZTbAOm3Iv_4zGWaaSepLBdaBlDl6jRg&oe=698AC7C5" },
-      { id: 8, name: "卡牌 #8", image: "https://scontent.ftpe8-3.fna.fbcdn.net/v/t39.30808-6/627208063_884958257625426_7014566943562269715_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=pjbqEp0NGvcQ7kNvwHt-pB-&_nc_oc=AdndHlx_U1yIcOCHuKFme5Vt4BOEH_VUJ3XexWvGu7kVzFLpkCr7NvT1r7EbYe_LPyVgnMed8FJduXPBk002qbZ7&_nc_zt=23&_nc_ht=scontent.ftpe8-3.fna&_nc_gid=eYJ7UPIafsDLuoOCfRLBZg&oh=00_AfvwbA9KsBm77zwdafWbbDaWpoi-9e616c34pJ30mTikEA&oe=698AAF57" }
+      { id: 1, name: "卡牌 #1", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/1.jpg?raw=true" },
+      { id: 2, name: "卡牌 #2", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/2.jpg?raw=true" },
+      { id: 3, name: "卡牌 #3", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/3.jpg?raw=true" },
+      { id: 4, name: "卡牌 #4", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/4.jpg?raw=true" },
+      { id: 5, name: "卡牌 #5", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/5.jpg?raw=true" },
+      { id: 6, name: "卡牌 #6", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/6.jpg?raw=true" },
+      { id: 7, name: "卡牌 #7", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/7.jpg?raw=true" },
+      { id: 8, name: "卡牌 #8", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/8.jpg?raw=true" }
     ];
     
     let drawHistory = [];

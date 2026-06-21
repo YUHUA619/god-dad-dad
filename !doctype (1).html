@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="zh-TW" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=auto">
+  <title>天父給你的今日提醒</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+     
+   {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    }
+    
+    @keyframes cardReveal {
+      0% { 
+        transform: rotateY(180deg) scale(0.3);
+        opacity: 0;
+      }
+      50% {
+        transform: rotateY(90deg) scale(1.1);
+        opacity: 0.5;
+      }
+      100% { 
+        transform: rotateY(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4); }
+    }
+    
+    @keyframes shuffleCards {
+      0% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-30px) rotate(-5deg); }
+      50% { transform: translateX(30px) rotate(5deg); }
+      75% { transform: translateX(-15px) rotate(-3deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    
+    .card-reveal {
+      animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    .card-glow {
+      animation: glow 2s ease-in-out infinite;
+    }
+    
+    .shuffle-animation {
+      animation: shuffleCards 0.6s ease-in-out;
+    }
+    
+    .sparkle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      animation: sparkle 1.5s ease-in-out infinite;
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .card-stack {
+      perspective: 1000px;
+    }
+    
+    .drawn-card {
+      transition: all 0.3s ease;
+    }
+    
+    .drawn-card:hover {
+      transform: scale(1.05) translateY(-5px);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto">
+  <div class="old-class" style="background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/20b104e8-c67e-4a56-915c-0c53659aab6e.png?raw=true');"></div>
+ <div id="app-container" 
+  class="min-h-full w-full relative overflow-hidden"
+  style="background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/BG1.jpg?raw=true');
+         background-size: cover;
+         background-position: center;
+         background-repeat: no-repeat;"><!-- 背景裝飾 -->
+   <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 left-10 w-32 h-32 bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute bottom-20 right-10 w-40 h-40 bg-purple-500 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/4 w-24 h-24 bg-pink-400 rounded-full opacity-10 blur-2xl"></div>
+   </div>
+   <div class="relative z-10 flex flex-col items-center justify-start min-h-full py-8 px-4"><!-- 標題 -->
+    <h1 id="main-title" class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-2 text-center drop-shadow-lg">✨ 抽卡導引 ✨</h1>
+    <p class="text-gray-300 mb-6 text-center">將你的問題、困惑或正在思考的事情放在心中。<br />
+深呼吸，安靜等候，抽出一張卡片。<br />
+願天父透過這段文字，帶給你新的眼光、方向與力量。<br /></p><!-- 抽卡區域 -->
+    <div class="flex flex-col items-center gap-6 w-full max-w-md"><!-- 卡牌堆 -->
+     <div id="card-stack" class="card-stack relative w-48 h-72 cursor-pointer float-animation">
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-800 rounded-2xl shadow-2xl border-4 border-yellow-400 flex items-center justify-center transform rotate-2 translate-x-2 translate-y-2 opacity-60">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-800 rounded-2xl shadow-2xl border-4 border-yellow-400 flex items-center justify-center transform -rotate-2 -translate-x-1 translate-y-1 opacity-80">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-2xl shadow-2xl border-4 border-yellow-400 flex items-center justify-center">
+       <div class="text-center">
+        <div class="text-6xl mb-2">
+         🎴
+        </div>
+        <p class="text-white font-bold text-lg">點擊抽卡</p>
+        <p id="card-count" class="text-yellow-300 text-sm mt-1">共 0 張卡牌</p>
+       </div>
+      </div>
+     </div><!-- 抽卡按鈕 --> <button id="draw-button" class="relative group px-10 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full font-bold text-xl text-white shadow-lg transform transition-all duration-300 hover:scale-110 hover:shadow-2xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"> <span class="relative z-10">🎲 抽一張！</span>
+      <div class="absolute inset-0 bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"></div></button>
+    </div><!-- 抽到的卡片展示區 -->
+    <div id="result-area" class="mt-8 flex flex-col items-center hidden">
+     <h2 class="text-2xl font-bold text-yellow-400 mb-4">🎉 今日祝福</h2>
+     <div id="drawn-card" class="relative"><!-- 光芒效果 -->
+      <div class="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 rounded-3xl opacity-30 blur-xl"></div>
+      <div class="sparkle" style="top: -10px; left: 20%; animation-delay: 0s;">
+       ✨
+      </div>
+      <div class="sparkle" style="top: 30%; right: -10px; animation-delay: 0.5s;">
+       ⭐
+      </div>
+      <div class="sparkle" style="bottom: -10px; left: 40%; animation-delay: 1s;">
+       ✨
+      </div>
+      <div class="sparkle" style="top: 50%; left: -10px; animation-delay: 0.3s;">
+       ⭐
+      </div><img id="card-image" class="relative w-56 h-80 object-cover rounded-xl shadow-2xl card-glow drawn-card" src="" alt="抽到的卡牌" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/20b104e8-c67e-4a56-915c-0c53659aab6e.png?raw=true'); this.alt='卡牌載入失敗';">
+     </div>
+     <p id="card-name" class="mt-4 text-xl font-bold text-white"></p>
+    </div><!-- 抽卡記錄 -->
+    <div id="history-section" class="mt-10 w-full max-w-2xl hidden">
+     <h3 class="text-xl font-bold text-yellow-400 mb-4 text-center">📜 抽卡記錄</h3>
+     <div id="history-container" class="flex flex-wrap justify-center gap-3 p-4 bg-black bg-opacity-30 rounded-2xl backdrop-blur-sm">
+     </div>
+     <p id="history-count" class="text-center text-gray-400 mt-3 text-sm"></p>
+    </div><!-- 無卡牌提示 -->
+    <div id="no-cards-message" class="mt-8 text-center hidden">
+     <div class="text-6xl mb-4">
+      📭
+     </div>
+     <p class="text-gray-300 text-lg">尚未載入卡牌圖片</p>
+     <p class="text-gray-400 text-sm mt-2">請在編輯器中添加卡牌圖片</p>
+    </div>
+   </div>
+  </div>
+  <script>
+    // 卡牌數據 - 這裡放置所有卡牌圖片URL
+    const cardPool = [
+      { id: 1, name: "卡牌 #1", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/1.jpg?raw=true" },
+      { id: 2, name: "卡牌 #2", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/2.jpg?raw=true" },
+      { id: 3, name: "卡牌 #3", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/3.jpg?raw=true" },
+      { id: 4, name: "卡牌 #4", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/4.jpg?raw=true" },
+      { id: 5, name: "卡牌 #5", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/5.jpg?raw=true" },
+      { id: 6, name: "卡牌 #6", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/6.jpg?raw=true" },
+      { id: 7, name: "卡牌 #7", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/7.jpg?raw=true" },
+      { id: 8, name: "卡牌 #8", image: "https://github.com/YUHUA619/god-dad-dad/blob/main/8.jpg?raw=true" }
+    ];
+    
+    let drawHistory = [];
+    let isDrawing = false;
+    
+    const defaultConfig = {
+      title_text: "✨ 天父給你的今日提醒 ✨",
+      draw_button_text: "🎲 抽一張！",
+      accent_color: "#fbbf24",
+      card_back_color: "#6366f1",
+      text_color: "#ffffff",
+      font_family: "Noto Sans TC"
+    };
+    
+    // 等比例隨機抽卡
+    function drawCard() {
+      if (cardPool.length === 0) return null;
+      const randomIndex = Math.floor(Math.random() * cardPool.length);
+      return cardPool[randomIndex];
+    }
+    
+    // 執行抽卡動畫和邏輯
+    function performDraw() {
+      if (isDrawing || cardPool.length === 0) return;
+      
+      isDrawing = true;
+      const drawButton = document.getElementById('draw-button');
+      const cardStack = document.getElementById('card-stack');
+      const resultArea = document.getElementById('result-area');
+      const cardImage = document.getElementById('card-image');
+      const cardName = document.getElementById('card-name');
+      
+      drawButton.disabled = true;
+      
+      // 洗牌動畫
+      cardStack.classList.add('shuffle-animation');
+      
+      setTimeout(() => {
+        cardStack.classList.remove('shuffle-animation');
+        
+        // 抽卡
+        const drawnCard = drawCard();
+        if (drawnCard) {
+          // 記錄歷史
+          drawHistory.push(drawnCard);
+          updateHistory();
+          
+          // 顯示結果
+          cardImage.src = drawnCard.image;
+          cardImage.alt = drawnCard.name;
+          cardName.textContent = drawnCard.name;
+          
+          resultArea.classList.remove('hidden');
+          cardImage.classList.remove('card-reveal');
+          void cardImage.offsetWidth; // 觸發重繪
+          cardImage.classList.add('card-reveal');
+        }
+        
+        drawButton.disabled = false;
+        isDrawing = false;
+      }, 600);
+    }
+    
+    // 更新抽卡記錄
+    function updateHistory() {
+      const historySection = document.getElementById('history-section');
+      const historyContainer = document.getElementById('history-container');
+      const historyCount = document.getElementById('history-count');
+      
+      if (drawHistory.length > 0) {
+        historySection.classList.remove('hidden');
+        
+        // 只顯示最近的記錄
+        const recentHistory = drawHistory.slice(-20);
+        historyContainer.innerHTML = recentHistory.map((card, index) => `
+          <div class="relative group">
+            <img src="${card.image}" alt="${card.name}" 
+                 class="w-16 h-24 object-cover rounded-lg shadow-md transition-transform duration-200 group-hover:scale-110 group-hover:z-10"
+                 style="animation-delay: ${index * 0.05}s"
+                 loading="lazy"
+                 onerror="console.error('Image failed to load:', this.src); this.style. background-image: url('https://github.com/YUHUA619/god-dad-dad/blob/main/20b104e8-c67e-4a56-915c-0c53659aab6e.png?raw=true'); this.alt='載入失敗';">
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all duration-200 flex items-center justify-center">
+              <span class="text-white text-xs opacity-0 group-hover:opacity-100 text-center px-1">${card.name}</span>
+            </div>
+          </div>
+        `).join('');
+        
+        historyCount.textContent = `已抽 ${drawHistory.length} 次`;
+      }
+    }
+    
+    // 檢查卡池狀態
+    function checkCardPool() {
+      const noCardsMessage = document.getElementById('no-cards-message');
+      const cardStack = document.getElementById('card-stack');
+      const drawButton = document.getElementById('draw-button');
+      const cardCount = document.getElementById('card-count');
+      
+      if (cardPool.length === 0) {
+        noCardsMessage.classList.remove('hidden');
+        cardStack.classList.add('hidden');
+        drawButton.disabled = true;
+      } else {
+        noCardsMessage.classList.add('hidden');
+        cardStack.classList.remove('hidden');
+        drawButton.disabled = false;
+        cardCount.textContent = `共 ${cardPool.length} 張卡牌`;
+      }
+    }
+    
+    // 配置變更處理
+    async function onConfigChange(config) {
+      const title = document.getElementById('main-title');
+      const drawButton = document.getElementById('draw-button');
+      const appContainer = document.getElementById('app-container');
+      
+      // 更新標題
+      title.textContent = config.title_text || defaultConfig.title_text;
+      
+      // 更新   鈕文字
+      drawButton.querySelector('span').textContent = config.draw_button_text || defaultConfig.draw_button_text;
+      
+      
+      // 更新強調色
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      title.style.background = `linear-gradient(to right, ${accentColor}, ${adjustColor(accentColor, 30)}, ${adjustColor(accentColor, -20)})`;
+      title.style.webkitBackgroundClip = 'text';
+      title.style.backgroundClip = 'text';
+      
+      // 更新字體
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${fontFamily}, 'Noto Sans TC', sans-serif`;
+    }
+    
+    // 顏色調整輔助函數
+    function adjustColor(hex, amount) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+      const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+      const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+      return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
+    }
+    
+    // 初始化
+    function init() {
+      // 綁定事件
+      document.getElementById('draw-button').addEventListener('click', performDraw);
+      document.getElementById('card-stack').addEventListener('click', performDraw);
+      
+      // 檢查卡池
+      checkCardPool();
+      
+      // 初始化 SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+              },
+              {
+                get: () => config.accent_color || defaultConfig.accent_color,
+                set: (value) => { config.accent_color = value; window.elementSdk.setConfig({ accent_color: value }); }
+              },
+              {
+                get: () => config.card_back_color || defaultConfig.card_back_color,
+                set: (value) => { config.card_back_color = value; window.elementSdk.setConfig({ card_back_color: value }); }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+            },
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["title_text", config.title_text || defaultConfig.title_text],
+            ["draw_button_text", config.draw_button_text || defaultConfig.draw_button_text]
+          ])
+        });
+      }
+      
+      // 應用初始配置
+      onConfigChange(defaultConfig);
+    }
+    
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c94601121e88412',t:'MTc3MDMxNTEzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=auto;a.width=auto;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
